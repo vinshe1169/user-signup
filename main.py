@@ -18,9 +18,9 @@ import webapp2
 import cgi
 import re
 
-def signup(err1,err2,err3):
+def signup(username,err1,err2,err3,err4):
     usernamelbl = "<label>Username:</label>"
-    usernameinput = "<input type = 'text' name = 'username'/>"
+    usernameinput = "<input type = 'text' name = 'username' value=" + username + ">"
     passwordlbl = "<label>Password:</label>"
     passwordinput = "<input type = 'password' name = 'password'/>"
     verifypasswordlbl = "<label>Verify Password:</label>"
@@ -29,15 +29,16 @@ def signup(err1,err2,err3):
     emailinput = "<input type = 'text' name = 'email'/>"
     usernameerr = err1
     passworderr = err2
-    emailerr = err3
+    verifypassworderr = err3
+    emailerr = err4
 
     submit = "<input type = 'submit'>"
 
     form = ("<form method ='post' action='/'>" +
             usernamelbl + usernameinput + err1 + "<br>" +
             passwordlbl + passwordinput + err2 + "<br>" +
-            verifypasswordlbl + verifypasswordinput +"<br>" +
-            emaillbl + emailinput +err3 + "<br>" +
+            verifypasswordlbl + verifypasswordinput + err3 + "<br>" +
+            emaillbl + emailinput + err4 + "<br>" +
             submit
             + "</form>")
     header = "<h2>Signup</h2>"
@@ -57,7 +58,7 @@ def valid_email(email):
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        content = signup("","","")
+        content = signup("","","","","")
         self.response.write(content)
 
     def post(self):
@@ -68,6 +69,7 @@ class MainHandler(webapp2.RequestHandler):
         have_error =False
         err_username = ''
         err_password = ''
+        err_verifypassword = ''
         err_email = ''
         if valid_username(username):
             err_username = ''
@@ -76,24 +78,41 @@ class MainHandler(webapp2.RequestHandler):
             err_username ="Invalid username entered"
 
         if valid_password(password) :
-            if valid_password(verifypassword) and (password == verifypassword):
-                err_password = ''
+            if password == verifypassword:
+                err_password= ''
+                err_verifypassword =''
             else:
                 have_error = True
-                err_password = "Password does not match"
+                err_verifypassword = "Password does not match"
         else:
             err_password = "Invalid Password"
             have_error = True
 
-        if valid_email(email):
-            err_email = ''
-        else:
-            err_email = "Invalid Email"
-            have_error = True
+#            if valid_password(verifypassword) and (password == verifypassword):
+#                err_password = ''
+#            else:
+#                have_error = True
+#                err_password = "Password does not match"
+#        else:
+#            err_password = "Invalid Password"
+#            have_error = True
+
+        if len(email) > 0:
+            if valid_email(email):
+                err_email=''
+            else:
+                err_email = "Invalid Email"
+                have_error = True
+
+        #if valid_email(email):
+        #    err_email = ''
+        #else:
+        #    err_email = "Invalid Email"
+        #    have_error = True
 
 
         if have_error:
-            content = signup(err_username,err_password,err_email)
+            content = signup(username,err_username,err_password,err_verifypassword,err_email)
             self.response.write(content)
         else:
             self.redirect('/welcome?username=' + username)
